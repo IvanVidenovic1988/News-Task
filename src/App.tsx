@@ -1,8 +1,35 @@
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { ROUTES } from './config/consts';
+import Login from './pages/Login/Login';
+import NewsList from './pages/News/NewsList';
+import Nav from './components/Nav';
+import ProtectedLoginRoute from './components/ProtectedLoginRoute';
+import ProtectedRoute from './components/ProtectedRoute';
+
 function App() {
   return (
-    <div className="flex-center">
-      <h1 className="text-4xl text-red-700">kurac</h1>
-      <p className="text-4xl text-yellow-200">kita</p>
+    <div className="">
+      <BrowserRouter>
+
+        <Nav />
+
+        <Routes>
+
+          <Route path={ROUTES.login} element={
+            <ProtectedLoginRoute>
+              <Login />
+            </ProtectedLoginRoute>}
+          />
+
+          <Route path={ROUTES.news} element={
+            <ProtectedRoute>
+              <NewsList />
+            </ProtectedRoute>}
+          />
+
+        </Routes>
+
+      </BrowserRouter>
     </div>
   );
 }

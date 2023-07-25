@@ -7,3 +7,19 @@
 .flex-center {
   @apply flex items-center justify-center;
 }
+
+.server-error-container {
+  @apply w-[75%] mx-auto mt-[30px] h-[50px] flex-center bg-orange-400 rounded;
+}
+
+.input {
+  @apply w-[450px] p-2 border-[2px] border-gray-400 rounded;
+}
+
+.disabled-login-btn {
+  @apply w-[80px] h-[40px] border-[2px] rounded opacity-25 border-red-300 text-red-300;
+}
+
+.login-btn {
+  @apply w-[80px] h-[40px] border-[2px] rounded border-red-600 text-red-600;
+}
