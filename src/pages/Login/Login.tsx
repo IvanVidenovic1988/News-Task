@@ -1,9 +1,11 @@
 import { FC, FormEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../shared/redux/hooks";
-import { setEmail, setError, setIsAuthenticated, setIsLoading, setPassword, setToken } from "./redux/login";
+import { handleLogin, setEmail } from "./redux/login";
+import Input from "../../components/Input";
+import Button from "../../components/Button";
 
-const MIN_LENGTH = 0
-const MAX_LENGTH = 3
+
+const MIN_LENGTH = 3
 
 type FormErrors = {
     emailError: string;
@@ -13,7 +15,8 @@ type FormErrors = {
 const Login: FC = () => {
 
     const email = useAppSelector((state) => state.login.email)
-    const password = useAppSelector((state) => state.login.password)
+    // const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
     const isLoading = useAppSelector((state) => state.login.isLoading)
     const error = useAppSelector((state) => state.login.error)
 
@@ -32,7 +35,7 @@ const Login: FC = () => {
             passwordError:
                 password.length === 0
                     ? "Password is required"
-                    : password.length < MAX_LENGTH
+                    : password.length < MIN_LENGTH
                         ? "Password must be at least 3 characters long"
                         : "",
         });
@@ -48,7 +51,7 @@ const Login: FC = () => {
 
 
     const validateEmail = () => {
-        if (email.length === MIN_LENGTH) {
+        if (email.length === 0) {
             setFormErrors((formErrors) => ({ ...formErrors, emailError: "Email is required" }))
             return false;
         }
@@ -58,9 +61,6 @@ const Login: FC = () => {
 
     const validatePassword = () => {
         if (password.length === MIN_LENGTH) {
-            setFormErrors((formErrors) => ({ ...formErrors, passwordError: "Password is required" }))
-            return false;
-        } else if (password.length < MAX_LENGTH) {
             setFormErrors((formErrors) => ({ ...formErrors, passwordError: "Password must be at least 3 characters long" }))
             return false;
         }
@@ -75,48 +75,15 @@ const Login: FC = () => {
         return isEmailValid && isPasswordValid
     }
 
-    const handleLogin = async (email: string, password: string) => {
-        try {
-            dispatch(setIsLoading(true));
-            const response = await fetch('http://localhost:3001/login', {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password,
-                }),
-            });
-
-            const loginData = await response.json();
-            console.log('loginData: ', loginData);
-            const token = loginData.token
-
-            if (response.ok) {
-                dispatch(setToken(token));
-                dispatch(setIsAuthenticated(true));
-            } else {
-                dispatch(setError(loginData.message));
-            }
-        } catch (error) {
-            dispatch(setError(error));
-        } finally {
-            dispatch(setIsLoading(false));
-        }
-    };
-
-
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         if (validateForm()) {
-            handleLogin(email, password)
+            dispatch(handleLogin(email, password))
         }
     }
 
     return (
         <>
-
             {error &&
                 <div className='server-error-container'>
                     <p className="font-bold text-white text-l">{error}</p>
@@ -131,45 +98,30 @@ const Login: FC = () => {
 
                 <form className="" onSubmit={handleSubmit}>
 
-                    <div className="pb-6">
-                        <label className="font-bold text-gray-500">Your email address *</label>
-                        <input
-                            type="email"
-                            placeholder='Email'
-                            onChange={(e) => dispatch(setEmail(e.target.value))}
-                            className={`input 
-                            ${formErrors.emailError ? 'border-red-700' : ''}`
-                            }
-                        />
-                        {formErrors.emailError &&
-                            <p className='text-red-700'>{formErrors.emailError}</p>
-                        }
-                    </div>
+                    <Input
+                        label="Your email address *"
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => dispatch(setEmail(e.target.value))}
+                        error={formErrors.emailError}
+                    />
 
-
-                    <div>
-                        <label className="pb-1 font-bold text-gray-500">Your password *</label>
-                        <input
-                            type="password"
-                            placeholder='Password'
-                            onChange={(e) => dispatch(setPassword(e.target.value))}
-                            value={password}
-                            className={`input 
-                            ${formErrors.passwordError ? 'border-red-700' : ''}`
-                            }
-                        />
-                        {formErrors.passwordError &&
-                            <p className='text-red-700'>{formErrors.passwordError}</p>
-                        }
-                    </div>
-
+                    <Input
+                        label="Your email address *"
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        error={formErrors.passwordError}
+                    />
 
                     <div className="flex justify-end pt-6">
-                        <button
+                        <Button
                             disabled={!isFormValid}
-                            className={`${isFormValid ? "login-btn" : 'disabled-login-btn'}`}>
-                            Login
-                        </button>
+                            text="Login"
+                            className={isFormValid ? "login-btn" : 'disabled-login-btn'}
+                        />
                     </div>
 
                 </form>

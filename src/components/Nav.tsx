@@ -1,17 +1,15 @@
-import { clearAuthState } from "../pages/Login/redux/login";
+import { logout } from "../pages/Login/redux/login";
 import { useAppDispatch, useAppSelector } from "../shared/redux/hooks";
 
 const Nav = () => {
 
     const token = useAppSelector((state) => state.login.token)
-    console.log('token: ', token);
     const email = useAppSelector((state) => state.login.email)
-    console.log('email: ', email);
 
     const dispatch = useAppDispatch()
 
     const handleLogout = () => {
-        dispatch(clearAuthState());
+        dispatch(logout());
     };
 
     return (

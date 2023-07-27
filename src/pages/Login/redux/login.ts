@@ -1,10 +1,11 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { Dispatch, createSlice } from "@reduxjs/toolkit";
+import { getRequestConfig } from "../../../shared/utils/utils";
+import { ROUTES } from "../../../config/consts";
 
 type InitialState = {
   email: string;
   password: string;
   token: string;
-  isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
 };
@@ -13,7 +14,6 @@ const initialState: InitialState = {
   email: "",
   password: "",
   token: localStorage.getItem("token") || "",
-  isAuthenticated: false,
   isLoading: false,
   error: null,
 };
@@ -25,15 +25,8 @@ const loginSlice = createSlice({
     setEmail: (state, action) => {
       state.email = action.payload;
     },
-    setPassword: (state, action) => {
-      state.password = action.payload;
-    },
     setToken: (state, action) => {
       state.token = action.payload;
-      localStorage.setItem("token", action.payload);
-    },
-    setIsAuthenticated: (state, action) => {
-      state.isAuthenticated = action.payload;
     },
     setIsLoading: (state, action) => {
       state.isLoading = action.payload;
@@ -41,26 +34,48 @@ const loginSlice = createSlice({
     setError: (state, action) => {
       state.error = action.payload;
     },
-    clearAuthState: (state) => {
-      state.email = "";
-      state.password = "";
+    logout: (state) => {
       state.token = "";
-      state.isAuthenticated = false;
-      state.isLoading = false;
-      state.error = null;
       localStorage.removeItem("token");
     },
   },
 });
 
-export const {
-  setEmail,
-  setPassword,
-  setToken,
-  setIsAuthenticated,
-  setIsLoading,
-  setError,
-  clearAuthState,
-} = loginSlice.actions;
+export const handleLogin =
+  (email: string, password: string) => async (dispatch: Dispatch) => {
+    try {
+      dispatch(setIsLoading(true));
+
+      const config = getRequestConfig({
+        method: "POST",
+        body: JSON.stringify({ email: email, password: password }),
+      });
+
+      const response = await fetch(
+        `http://localhost:3001${ROUTES.login}`,
+        config
+      );
+      const loginData = await response.json();
+      console.log("loginData: ", loginData);
+      const token = loginData.token;
+
+      if (response.ok) {
+        localStorage.setItem("token", token);
+        dispatch({
+          type: "login/setToken",
+          payload: token,
+        });
+      } else {
+        dispatch(setError(loginData.message));
+      }
+    } catch (error) {
+      dispatch(setError(error));
+    } finally {
+      dispatch(setIsLoading(false));
+    }
+  };
+
+export const { setEmail, setToken, setIsLoading, setError, logout } =
+  loginSlice.actions;
 
 export default loginSlice.reducer;
