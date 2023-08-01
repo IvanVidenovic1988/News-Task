@@ -1,45 +1,24 @@
 import { Dispatch, createSlice } from "@reduxjs/toolkit";
 import { getRequestConfig } from "../../../shared/utils/utils";
 import { ROUTES } from "../../../config/consts";
+import { env } from "../../../config/config";
+
+type User = {
+  email: string;
+  id: string;
+};
 
 type InitialState = {
-  email: string;
-  password: string;
-  token: string;
   isLoading: boolean;
   error: string | null;
+  user: User | null;
 };
 
 const initialState: InitialState = {
-  email: "",
-  password: "",
-  token: localStorage.getItem("token") || "",
   isLoading: false,
   error: null,
+  user: null,
 };
-
-const loginSlice = createSlice({
-  name: "login",
-  initialState,
-  reducers: {
-    setEmail: (state, action) => {
-      state.email = action.payload;
-    },
-    setToken: (state, action) => {
-      state.token = action.payload;
-    },
-    setIsLoading: (state, action) => {
-      state.isLoading = action.payload;
-    },
-    setError: (state, action) => {
-      state.error = action.payload;
-    },
-    logout: (state) => {
-      state.token = "";
-      localStorage.removeItem("token");
-    },
-  },
-});
 
 export const handleLogin =
   (email: string, password: string) => async (dispatch: Dispatch) => {
@@ -51,22 +30,19 @@ export const handleLogin =
         body: JSON.stringify({ email: email, password: password }),
       });
 
-      const response = await fetch(
-        `http://localhost:3001${ROUTES.login}`,
-        config
-      );
-      const loginData = await response.json();
-      console.log("loginData: ", loginData);
-      const token = loginData.token;
+      const response = await fetch(`${env.API_URL}${ROUTES.login}`, config);
+      const payload = await response.json();
+      console.log("payload: ", payload);
+      const token = payload.token;
 
       if (response.ok) {
         localStorage.setItem("token", token);
         dispatch({
-          type: "login/setToken",
-          payload: token,
+          type: "login/setUser",
+          payload: payload.user,
         });
       } else {
-        dispatch(setError(loginData.message));
+        dispatch(setError(payload.message));
       }
     } catch (error) {
       dispatch(setError(error));
@@ -75,7 +51,26 @@ export const handleLogin =
     }
   };
 
-export const { setEmail, setToken, setIsLoading, setError, logout } =
-  loginSlice.actions;
+const loginSlice = createSlice({
+  name: "login",
+  initialState,
+  reducers: {
+    setUser: (state, action) => {
+      state.user = action.payload;
+    },
+    setIsLoading: (state, action) => {
+      state.isLoading = action.payload;
+    },
+    setError: (state, action) => {
+      state.error = action.payload;
+    },
+    logout: (state) => {
+      state.user = null;
+      localStorage.removeItem("token");
+    },
+  },
+});
+
+export const { setUser, setIsLoading, setError, logout } = loginSlice.actions;
 
 export default loginSlice.reducer;

@@ -7,9 +7,9 @@ type ChildrenProps = {
 }
 
 const ProtectedLoginRoute = ({ children }: ChildrenProps) => {
-  const token = useAppSelector((state) => state.login.token)
+  const user = useAppSelector((state) => state.login.user)
 
-  if (token) {
+  if (user) {
     return <Navigate to={ROUTES.news} />;
   }
 

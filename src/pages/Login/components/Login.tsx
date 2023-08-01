@@ -1,8 +1,8 @@
 import { FC, FormEvent, useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../shared/redux/hooks";
-import { handleLogin, setEmail } from "./redux/login";
-import Input from "../../components/Input";
-import Button from "../../components/Button";
+import { useAppDispatch, useAppSelector } from "../../../shared/redux/hooks";
+import { handleLogin } from "../redux/login";
+import Input from "../../../components/Input";
+import Button from "../../../components/Button";
 
 
 const MIN_LENGTH = 3
@@ -14,9 +14,10 @@ type FormErrors = {
 
 const Login: FC = () => {
 
-    const email = useAppSelector((state) => state.login.email)
-    // const [email, setEmail] = useState('')
+    // const email = useAppSelector((state) => state.login.email)
+    const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+
     const isLoading = useAppSelector((state) => state.login.isLoading)
     const error = useAppSelector((state) => state.login.error)
 
@@ -103,7 +104,7 @@ const Login: FC = () => {
                         type="email"
                         placeholder="Email"
                         value={email}
-                        onChange={(e) => dispatch(setEmail(e.target.value))}
+                        onChange={(e) => setEmail(e.target.value)}
                         error={formErrors.emailError}
                     />
 
